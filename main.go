@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
 	api "github.com/osrg/gobgp/api"
@@ -11,16 +12,29 @@ import (
 	"os/signal"
 )
 
+var (
+	resumeFile      = flag.String("resume", "resume.txt", "path to resume file")
+	localAsn        = flag.Uint("local-asn", 34553, "local ASN")
+	localAddress    = flag.String("local-addr", "127.0.0.1", "local address to bind to")
+	upstreamAsn     = flag.Uint("upstream-asn", 34553, "upstream's ASN")
+	upstreamAddress = flag.String("upstream-addr", "127.0.0.2", "upstream's peering address")
+	multihop        = flag.Bool("multihop", false, "enable BGP multihop")
+)
+
 func main() {
+	flag.Parse()
+
 	log.SetLevel(log.DebugLevel)
+
+	// Create GoBGP server
 	s := gobgp.NewBgpServer()
 	go s.Serve()
 
 	// global configuration
 	if err := s.StartBgp(context.Background(), &api.StartBgpRequest{
 		Global: &api.Global{
-			As:         65003,
-			RouterId:   "10.0.255.254",
+			As:         uint32(*localAsn),
+			RouterId:   *localAddress,
 			ListenPort: 179,
 		},
 	}); err != nil {
@@ -35,8 +49,8 @@ func main() {
 	// neighbor configuration
 	n := &api.Peer{
 		Conf: &api.PeerConf{
-			NeighborAddress: "172.17.0.2",
-			PeerAs:          65002,
+			NeighborAddress: *upstreamAddress,
+			PeerAs:          uint32(*upstreamAsn),
 		},
 	}
 
@@ -47,37 +61,6 @@ func main() {
 	}
 
 	// add routes
-	nlri, _ := ptypes.MarshalAny(&api.IPAddressPrefix{
-		Prefix:    "10.0.0.0",
-		PrefixLen: 24,
-	})
-
-	a1, _ := ptypes.MarshalAny(&api.OriginAttribute{
-		Origin: 0,
-	})
-	a2, _ := ptypes.MarshalAny(&api.NextHopAttribute{
-		NextHop: "10.0.0.1",
-	})
-	a3, _ := ptypes.MarshalAny(&api.AsPathAttribute{
-		Segments: []*api.AsSegment{
-			{
-				Type:    2,
-				Numbers: []uint32{6762, 39919, 65000, 35753, 65000},
-			},
-		},
-	})
-	attrs := []*any.Any{a1, a2, a3}
-
-	_, err := s.AddPath(context.Background(), &api.AddPathRequest{
-		Path: &api.Path{
-			Family: &api.Family{Afi: api.Family_AFI_IP, Safi: api.Family_SAFI_UNICAST},
-			Nlri:   nlri,
-			Pattrs: attrs,
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	v6Family := &api.Family{
 		Afi:  api.Family_AFI_IP6,
