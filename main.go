@@ -13,16 +13,23 @@ import (
 )
 
 var (
-	resumeFile      = flag.String("resume", "resume.txt", "path to resume file")
-	localAsn        = flag.Uint("local-asn", 34553, "local ASN")
-	localAddress    = flag.String("local-addr", "127.0.0.1", "local address to bind to")
-	upstreamAsn     = flag.Uint("upstream-asn", 34553, "upstream's ASN")
-	upstreamAddress = flag.String("upstream-addr", "127.0.0.2", "upstream's peering address")
+	resumeFile      = flag.String("resume", "", "path to resume file")
+	localAsn        = flag.Uint("local-asn", 0, "local ASN")
+	localAddress    = flag.String("local-addr", "", "local address to bind to")
+	localPort       = flag.Uint("local-port", 179, "local BGP listen port")
+	upstreamAsn     = flag.Uint("upstream-asn", 0, "upstream's ASN")
+	upstreamAddress = flag.String("upstream-addr", "", "upstream's peering address")
 	multihop        = flag.Bool("multihop", false, "enable BGP multihop")
 )
 
 func main() {
 	flag.Parse()
+
+	// Validate flags
+	if *resumeFile == "" || *localAsn == 0 || *localAddress == "" || *upstreamAsn == 0 || *upstreamAddress == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	log.SetLevel(log.DebugLevel)
 
@@ -30,23 +37,23 @@ func main() {
 	s := gobgp.NewBgpServer()
 	go s.Serve()
 
-	// global configuration
+	// Setup BGP listener
 	if err := s.StartBgp(context.Background(), &api.StartBgpRequest{
 		Global: &api.Global{
 			As:         uint32(*localAsn),
 			RouterId:   *localAddress,
-			ListenPort: 179,
+			ListenPort: int32(*localPort),
 		},
 	}); err != nil {
 		log.Fatal(err)
 	}
 
-	// monitor the change of the peer state
+	// Monitor peer state change
 	if err := s.MonitorPeer(context.Background(), &api.MonitorPeerRequest{}, func(p *api.Peer) { log.Info(p) }); err != nil {
 		log.Fatal(err)
 	}
 
-	// neighbor configuration
+	// Configure the upstream BGP session
 	n := &api.Peer{
 		Conf: &api.PeerConf{
 			NeighborAddress: *upstreamAddress,
@@ -60,7 +67,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// add routes
+	// Add route
+	a1, _ := ptypes.MarshalAny(&api.OriginAttribute{
+		Origin: uint32(*localAsn),
+	})
 
 	v6Family := &api.Family{
 		Afi:  api.Family_AFI_IP6,
@@ -68,7 +78,7 @@ func main() {
 	}
 
 	// add v6 route
-	nlri, _ = ptypes.MarshalAny(&api.IPAddressPrefix{
+	nlri, _ := ptypes.MarshalAny(&api.IPAddressPrefix{
 		PrefixLen: 64,
 		Prefix:    "2001:db8:1::",
 	})
@@ -82,7 +92,7 @@ func main() {
 		Communities: []uint32{100, 200},
 	})
 
-	_, err = s.AddPath(context.Background(), &api.AddPathRequest{
+	_, err := s.AddPath(context.Background(), &api.AddPathRequest{
 		Path: &api.Path{
 			Family: v6Family,
 			Nlri:   nlri,
