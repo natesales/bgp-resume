@@ -7,7 +7,7 @@ I am a student and software developer passionate about network technologies and 
 📧 nate@natesales.net
 📞 (503) 858 3639
 🌐 natesales.net
-✏️ blog.natesales.net
+✏️  blog.natesales.net
 💻 GitHub.com/natesales
 🌍 AS34553
 ```
