@@ -1,7 +1,6 @@
 package encoding
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -59,13 +58,6 @@ func Marshal(input string, asn uint32) []*api.LargeCommunity {
 		localData = append(localData, uint32(elemUint32))
 	}
 
-	fmt.Println(localData)
-
-	fmt.Println("Padded characters:")
-	fmt.Println(paddedCharacters)
-	fmt.Println("Padded characters length:")
-	fmt.Println(len(paddedCharacters))
-
 	// Assemble the integers into communities
 	var communities []*api.LargeCommunity
 	for i := 0; i < len(localData); i += 2 {
@@ -84,7 +76,7 @@ func Marshal(input string, asn uint32) []*api.LargeCommunity {
 		}
 	}
 
-	log.Infof("Converted %d bytes into %d communities\n", len(input), len(communities))
+	log.Infof("converted %d bytes into %d communities\n", len(input), len(communities))
 
 	return communities
 }
