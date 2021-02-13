@@ -65,6 +65,7 @@ func main() {
 					log.Fatalf("unable to parse data %d to an integer", data2)
 				}
 
+				// Create and append a new community
 				communities = append(communities, &api.LargeCommunity{
 					GlobalAdmin: uint32(asn),
 					LocalData1:  uint32(data1),
@@ -72,7 +73,7 @@ func main() {
 				})
 			}
 		}
-	default:
+	default: // If the supplied format doesn't have a parser, show the flags
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
