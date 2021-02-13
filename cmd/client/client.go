@@ -86,10 +86,6 @@ func main() {
 	outputString := encoding.Unmarshal(communities, uint32(*asnFilter))
 
 	// Decode as base64
-	decoded, err := base64.StdEncoding.DecodeString(outputString)
-	if err != nil {
-		log.Warnf("unable to decode output as base64 (%v), displaying raw output\n", err)
-		fmt.Println(outputString)
-	}
+	decoded, _ := base64.StdEncoding.DecodeString(outputString)
 	fmt.Println(string(decoded))
 }
