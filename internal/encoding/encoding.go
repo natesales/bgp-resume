@@ -110,7 +110,7 @@ func toCharacter(input string) string {
 }
 
 // Unmarshal converts a list of BGP large communities into a string
-func Unmarshal(communities []api.LargeCommunity, asn uint32) string {
+func Unmarshal(communities []*api.LargeCommunity, asn uint32) string {
 	// Convert communities into list of integers
 	var dataIntegers []uint32
 	for _, community := range communities {
