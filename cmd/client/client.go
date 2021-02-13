@@ -4,12 +4,13 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	api "github.com/osrg/gobgp/api"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	api "github.com/osrg/gobgp/api"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/bgp-resume/internal/encoding"
 )
