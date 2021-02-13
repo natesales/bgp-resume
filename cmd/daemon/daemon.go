@@ -53,6 +53,8 @@ func main() {
 	}
 	resume := base64.StdEncoding.EncodeToString(resumeBytes)
 
+	log.Debug("using encoded resume:", resume)
+
 	communities := encoding.Marshal(resume, uint32(*asn))
 
 	s := gobgp.NewBgpServer()
