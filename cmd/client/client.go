@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"flag"
 	"fmt"
 	api "github.com/osrg/gobgp/api"
@@ -83,5 +84,12 @@ func main() {
 
 	// Decode the communities into a string
 	outputString := encoding.Unmarshal(communities, uint32(*asnFilter))
-	fmt.Println(outputString)
+
+	// Decode as base64
+	decoded, err := base64.StdEncoding.DecodeString(outputString)
+	if err != nil {
+		log.Warnf("unable to decode output as base64 (%v), displaying raw output\n", err)
+		fmt.Println(outputString)
+	}
+	fmt.Println(string(decoded))
 }
