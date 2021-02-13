@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"flag"
 	"io/ioutil"
 	"os"
@@ -50,7 +51,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	resume := string(resumeBytes)
+	resume := base64.StdEncoding.EncodeToString(resumeBytes)
 
 	communities := encoding.Marshal(resume, uint32(*asn))
 

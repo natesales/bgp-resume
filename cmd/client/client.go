@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"flag"
 	"fmt"
 	api "github.com/osrg/gobgp/api"
@@ -41,7 +42,7 @@ func main() {
 		// Split by BGP large community attributes
 		communitiesString := strings.Split(string(bytes), "BGP.large_community: ")
 		if len(communitiesString) < 2 {
-			log.Fatal("No communities found for route. Did you add `all` to your bird query?")
+			log.Fatal("no communities found for route. Did you add `all` to your bird query?")
 		}
 
 		// Loop over communities, trimming parenthesis
@@ -84,5 +85,10 @@ func main() {
 	// Decode the communities into a string
 	outputString := encoding.Unmarshal(communities, uint32(*asnFilter))
 
-	fmt.Println(outputString)
+	// Decode as base64
+	decoded, err := base64.StdEncoding.DecodeString(outputString)
+	if err != nil {
+		log.Fatal("unable to decode output as base64")
+	}
+	fmt.Println(string(decoded))
 }
