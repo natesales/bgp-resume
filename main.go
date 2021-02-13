@@ -82,27 +82,28 @@ func main() {
 		Safi: api.Family_SAFI_UNICAST,
 	}
 
-	// add routes
+	// BGP route attributes
+	// TODO: error handling instead of ignoring
 	nlri, _ := ptypes.MarshalAny(&api.IPAddressPrefix{
 		Prefix:    prefixNetwork,
 		PrefixLen: uint32(prefixMask),
 	})
 
-	a1, _ := ptypes.MarshalAny(&api.OriginAttribute{
+	originAttr, _ := ptypes.MarshalAny(&api.OriginAttribute{
 		Origin: 0,
 	})
 
-	v6Attrs, _ := ptypes.MarshalAny(&api.MpReachNLRIAttribute{
+	reachabilityAttrs, _ := ptypes.MarshalAny(&api.MpReachNLRIAttribute{
 		Family:   v6Family,
 		NextHops: []string{*localAddress},
 		Nlris:    []*any.Any{nlri},
 	})
 
-	communities, _ := ptypes.MarshalAny(&api.CommunitiesAttribute{
-		Communities: []uint32{100, 200, 300},
+	largeCommunities, _ := ptypes.MarshalAny(&api.LargeCommunitiesAttribute{
+		Communities: []*api.LargeCommunity{},
 	})
 
-	pathAttrs := []*any.Any{a1, v6Attrs, communities}
+	pathAttrs := []*any.Any{originAttr, reachabilityAttrs, largeCommunities}
 
 	_, err = s.AddPath(context.Background(), &api.AddPathRequest{
 		Path: &api.Path{
