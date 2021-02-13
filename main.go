@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"strconv"
@@ -13,6 +14,8 @@ import (
 	api "github.com/osrg/gobgp/api"
 	gobgp "github.com/osrg/gobgp/pkg/server"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/bgp-resume/internal/encoding"
 )
 
 var (
@@ -25,6 +28,7 @@ var (
 )
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	flag.Parse()
 
 	// Validate flags
@@ -41,9 +45,15 @@ func main() {
 		log.Fatalf("unable to parse prefix mask: %v", err)
 	}
 
-	// TODO: add startup info about what's going on
+	log.Debugln("Reading resume file")
+	resumeBytes, err := ioutil.ReadFile(*resumeFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resume := string(resumeBytes)
 
-	log.SetLevel(log.DebugLevel)
+	communities := encoding.Marshal(resume, uint32(*asn))
+
 	s := gobgp.NewBgpServer()
 	go s.Serve()
 
@@ -100,7 +110,7 @@ func main() {
 	})
 
 	largeCommunities, _ := ptypes.MarshalAny(&api.LargeCommunitiesAttribute{
-		Communities: []*api.LargeCommunity{},
+		Communities: communities,
 	})
 
 	pathAttrs := []*any.Any{originAttr, reachabilityAttrs, largeCommunities}
