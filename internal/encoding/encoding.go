@@ -114,7 +114,7 @@ func Unmarshal(communities []api.LargeCommunity, asn uint32) string {
 	// Convert communities into list of integers
 	var dataIntegers []uint32
 	for _, community := range communities {
-		if community.GlobalAdmin == asn {
+		if community.GlobalAdmin == asn && community.LocalData1 >= 1000000000 && community.LocalData2 >= 1000000000 {
 			dataIntegers = append(dataIntegers, community.LocalData1)
 			dataIntegers = append(dataIntegers, community.LocalData2)
 		}
