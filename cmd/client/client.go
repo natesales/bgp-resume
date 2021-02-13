@@ -42,7 +42,7 @@ func main() {
 		// Split by BGP large community attributes
 		communitiesString := strings.Split(string(bytes), "BGP.large_community: ")
 		if len(communitiesString) < 2 {
-			log.Fatal("no communities found for route. Did you add `all` to your bird query?")
+			log.Fatal("no communities found for route")
 		}
 
 		// Loop over communities, trimming parenthesis
@@ -88,7 +88,8 @@ func main() {
 	// Decode as base64
 	decoded, err := base64.StdEncoding.DecodeString(outputString)
 	if err != nil {
-		log.Fatal("unable to decode output as base64")
+		log.Warnf("unable to decode output as base64 (%v), displaying raw output\n", err)
+		fmt.Println(outputString)
 	}
 	fmt.Println(string(decoded))
 }
