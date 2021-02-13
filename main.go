@@ -19,7 +19,6 @@ var (
 	asn             = flag.Uint("asn", 0, "ASN")
 	localAddress    = flag.String("local-addr", "", "local address to bind to")
 	upstreamAddress = flag.String("upstream-addr", "", "upstream's peering address")
-	multihop        = flag.Bool("multihop", false, "enable BGP multihop")
 	routerId        = flag.String("router-id", "", "BGP router id")
 	prefix          = flag.String("prefix", "", "IPv6 prefix to announce")
 )
