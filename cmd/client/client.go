@@ -39,10 +39,13 @@ func main() {
 	switch *format {
 	case "bird":
 		// Split by BGP large community attributes
-		communitiesString := strings.Split(string(bytes), "BGP.large_community: ")[1]
+		communitiesString := strings.Split(string(bytes), "BGP.large_community: ")
+		if len(communitiesString) < 2 {
+			log.Fatal("No communities found for route. Did you add `all` to your bird query?")
+		}
 
 		// Loop over communities, trimming parenthesis
-		for _, community := range strings.Split(strings.ReplaceAll(communitiesString, ")", ""), "(") {
+		for _, community := range strings.Split(strings.ReplaceAll(communitiesString[1], ")", ""), "(") {
 			parts := strings.Split(strings.TrimSpace(community), ", ")
 			if len(parts) == 3 { // Only include lines that have all 3 parts of BGP large community
 				asn, err := strconv.Atoi(parts[0])
