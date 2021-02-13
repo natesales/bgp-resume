@@ -120,8 +120,6 @@ func Unmarshal(communities []*api.LargeCommunity, asn uint32) string {
 		}
 	}
 
-	fmt.Println(dataIntegers)
-
 	// Convert integers into characters
 	output := ""
 	for _, part := range dataIntegers {
