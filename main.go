@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"flag"
+	"os"
+	"os/signal"
+	"strconv"
+	"strings"
+
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
 	api "github.com/osrg/gobgp/api"
 	gobgp "github.com/osrg/gobgp/pkg/server"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"os/signal"
-	"strconv"
-	"strings"
 )
 
 var (
